@@ -122,3 +122,8 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env
 - The API resolves `host.docker.internal` on Linux via `extra_hosts: host-gateway` in the override.
 - You can also run the API outside Docker entirely; just set `NEO4J_URI=bolt://localhost:7687` and
   `NEO4J_USER` / `NEO4J_PASS` in your shell.
+
+
+### Compose v2 notes
+- Removed deprecated `version` key from compose files.
+- `docker-compose.local.yml` now overrides `api.depends_on` to `[]` so you can run without the Neo4j container (use `--profile db` to include it).

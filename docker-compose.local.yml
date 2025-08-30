@@ -1,5 +1,3 @@
-
-version: "3.9"
 services:
   # Mark Neo4j container as optional (started only with: --profile db)
   neo4j:
