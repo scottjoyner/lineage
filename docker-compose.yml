@@ -41,3 +41,20 @@ services:
     - api
     ports:
     - ${WEB_PORT:-3000}:80
+
+  ingest:
+    build: ./scanner
+    container_name: lineage_ingest
+    profiles: ["ingest"]
+    depends_on: []
+    environment:
+      NEO4J_URI: "${NEO4J_URI:-bolt://neo4j:7687}"
+      NEO4J_USER: "${NEO4J_USER:-neo4j}"
+      NEO4J_PASS: "${NEO4J_PASS:-${NEO4J_PASSWORD}}"
+    command: ["ingest", "--path", "/scan", "--conn", "${SCANNER_CONN:-demo_pg}", "--connections", "/connections.yaml"]
+    volumes:
+      - "${SCAN_PATH:-./sample-repo}:/scan:ro"
+      - "./scanner/connections.yaml:/connections.yaml:ro"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "neo4j:host-gateway"

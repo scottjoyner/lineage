@@ -127,3 +127,34 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env
 ### Compose v2 notes
 - Removed deprecated `version` key from compose files.
 - `docker-compose.local.yml` now overrides `api.depends_on` to `[]` so you can run without the Neo4j container (use `--profile db` to include it).
+
+
+## One-shot scan → ingest (elegant option)
+
+Keep API/UI separate for fast reads, and run ingestion as a **one-shot job** when you need to refresh lineage.
+
+**Setup**
+- Set `SCAN_PATH` in `.env` to a repo directory (default: `./sample-repo` included).
+- Optionally set `SCANNER_CONN` to a connection name (see `scanner/connections.yaml`).
+
+**Run with containerized Neo4j (compose DB)**
+```bash
+# if you want the db, api, web and the one-shot ingest
+docker compose --env-file .env --profile db --profile ingest up -d --build
+# or just run the ingest job once:
+docker compose --env-file .env --profile ingest up --build ingest
+```
+
+**Run with local Neo4j (passthrough)**
+```bash
+# point at your host DB
+echo "NEO4J_URI=bolt://host.docker.internal:7687" >> .env
+echo "NEO4J_PASS=<your-local-password>" >> .env
+
+docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env --profile ingest up --build ingest
+```
+
+The `ingest` service:
+- mounts your repo at `/scan`
+- runs `scanner ingest` (scan → push via Neo4j driver)
+- exits upon completion (idempotent MERGEs in Cypher)
