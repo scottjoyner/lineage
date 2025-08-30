@@ -31,6 +31,7 @@ services:
     ports:
     - ${API_PORT:-8000}:8000
     extra_hosts:
+      - "neo4j:host-gateway"
     - host.docker.internal:host-gateway
   web:
     build: ./web

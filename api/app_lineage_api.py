@@ -94,3 +94,33 @@ def lineage(
             edge_payloads.append(to_edge_payload(r, src, dst))
 
     return {"nodes": list(node_payloads.values()), "edges": edge_payloads}
+
+import socket
+from urllib.parse import urlparse
+from fastapi.responses import JSONResponse
+
+print(f"[Lineage API] NEO4J_URI={NEO4J_URI}  NEO4J_USER={NEO4J_USER}")
+
+@app.get("/debug/neo4j")
+def debug_neo4j():
+    info = {"uri": NEO4J_URI, "user": NEO4J_USER}
+    try:
+        u = urlparse(NEO4J_URI)
+        host = u.hostname
+        port = u.port or 7687
+        info["parsed_host"] = host
+        info["parsed_port"] = port
+        try:
+            addrs = socket.getaddrinfo(host, port, proto=socket.IPPROTO_TCP)
+            info["dns"] = [a[4][0] for a in addrs]
+        except Exception as e:
+            info["dns_error"] = str(e)
+        try:
+            with driver.session() as s:
+                val = s.run("RETURN 1 AS one").single().get("one")
+            info["driver_test"] = f"ok (RETURN {val})"
+        except Exception as e:
+            info["driver_error"] = str(e)
+    except Exception as e:
+        info["error"] = str(e)
+    return JSONResponse(info)

@@ -1,0 +1,14 @@
+connections:
+  demo_pg:
+    system: postgres
+    host: localhost
+    db: dw
+    schema: public
+  demo_snowflake:
+    system: snowflake
+    host: sf.company
+    db: ANALYTICS
+    schema: PUBLIC
+  demo_kafka:
+    system: kafka
+    host: localhost

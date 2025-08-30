@@ -12,4 +12,5 @@ services:
       # set NEO4J_PASS here if your local DB uses a different password
       # NEO4J_PASS: "your-local-neo4j-password"
     extra_hosts:
+      - "neo4j:host-gateway"
       - "host.docker.internal:host-gateway"
