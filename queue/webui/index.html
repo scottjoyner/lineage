@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Queue & Events</title>
+  <link rel="stylesheet" href="/assets/styles.css"/>
+  <style>
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .card { background:#111827;border:1px solid #1f2937;border-radius:12px;padding:12px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border-bottom:1px solid #1f2937; padding:6px 8px; font-size:12px; }
+    th { text-align:left; color:#94a3b8; }
+    .ok { color:#10b981; }
+    .err { color:#f87171; }
+    input, button, select { font-size: 14px; border:1px solid #1f2937; background:#0b1220; color:#e5e7eb; border-radius:8px; padding:8px 10px; }
+    button.primary { background: #0ea5e9; border-color:#0284c7; color:white; }
+    .tiny { font-size: 12px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Lineage Queue & Events</h1>
+    <nav class="nav">
+      <a href="/index.html">Explorer</a>
+      <a href="/view-dagre.html">DAG</a>
+      <a href="/view-cose-bilkent.html">Large</a>
+      <a href="/view-sbgn.html">SBGN</a>
+      <a href="/view-grid.html">Grid</a>
+      <a href="/queue/index.html">Queue</a>
+    </nav>
+  </header>
+  <div class="panel">
+    <h2>Create Ingest Job</h2>
+    <div class="row"><label style="min-width:120px">Queue API</label><input id="api" style="flex:1" /></div>
+    <div class="row"><label style="min-width:120px">Conn name</label><input id="conn" value="demo_pg"/></div>
+    <div class="row"><label style="min-width:120px">Repo path</label><input id="path" placeholder="./repo-on-host"/></div>
+    <div class="row"><label style="min-width:120px">Git URL</label><input id="git" placeholder="https://github.com/org/repo.git"/></div>
+    <div class="row"><label style="min-width:120px">Branch</label><input id="branch" placeholder="main"/></div>
+    <div class="row"><button id="enqueue" class="primary">Enqueue</button></div>
+
+    <h2>Publish Event</h2>
+    <div class="row"><label style="min-width:120px">Key</label><input id="ekey" value="repo:push"/></div>
+    <div class="row"><label style="min-width:120px">Payload (JSON)</label><input id="epayload" value='{"example":true}'/></div>
+    <div class="row"><button id="pub">Publish</button></div>
+  </div>
+  <div class="panel" style="grid-column:2;grid-row:2">
+    <div class="grid">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <h3>Jobs</h3>
+          <button id="refresh">Refresh</button>
+        </div>
+        <table>
+          <thead><tr><th>ID</th><th>Status</th><th>Type</th><th>Conn</th><th>Path/Repo</th><th>Created</th></tr></thead>
+          <tbody id="jobs"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Live Events</h3>
+        <pre id="feed" class="kv" style="min-height: 300px; max-height: 600px; overflow:auto"></pre>
+      </div>
+    </div>
+    <div class="tiny">Tip: API defaults to <code>http://localhost:9000</code>. Set <code>NEO4J_*</code> envs for the worker to point at your DB.</div>
+  </div>
+</div>
+<script>
+(function(){
+  const apiIn = document.getElementById('api');
+  const jobsT = document.getElementById('jobs');
+  const feed = document.getElementById('feed');
+
+  apiIn.value = (location.hostname ? `http://${location.hostname}:9000` : 'http://localhost:9000');
+
+  async function loadJobs(){
+    const res = await fetch(apiIn.value + '/jobs');
+    const data = await res.json();
+    jobsT.innerHTML = data.items.map(j => 
+      `<tr>
+        <td>${j.id}</td>
+        <td>${j.status}</td>
+        <td>${j.type}</td>
+        <td>${j.conn_name||''}</td>
+        <td>${j.repo_path||j.git_url||''}</td>
+        <td>${j.created_at}</td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('refresh').addEventListener('click', loadJobs);
+  document.getElementById('enqueue').addEventListener('click', async () => {
+    const body = {
+      conn_name: document.getElementById('conn').value.trim(),
+      repo_path: document.getElementById('path').value.trim() || null,
+      git_url: document.getElementById('git').value.trim() || null,
+      git_branch: document.getElementById('branch').value.trim() || null,
+    };
+    const res = await fetch(apiIn.value + '/jobs/ingest', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const j = await res.json();
+    alert('Enqueued job ' + j.id);
+    loadJobs();
+  });
+
+  document.getElementById('pub').addEventListener('click', async () => {
+    const key = document.getElementById('ekey').value.trim();
+    let payload = {};
+    try { payload = JSON.parse(document.getElementById('epayload').value.trim()||'{}'); } catch (e) {}
+    await fetch(apiIn.value + '/publish', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({key, payload})});
+  });
+
+  // SSE
+  const es = new EventSource(apiIn.value.replace(/^http/, 'http') + '/events/stream');
+  es.onmessage = evt => {
+    const data = JSON.parse(evt.data);
+    const ts = new Date().toISOString();
+    feed.textContent = `[${ts}] ${JSON.stringify(data)}\n` + feed.textContent;
+    loadJobs();
+  };
+
+  loadJobs();
+})();
+</script>
+</body>
+</html>

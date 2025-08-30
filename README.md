@@ -158,3 +158,33 @@ The `ingest` service:
 - mounts your repo at `/scan`
 - runs `scanner ingest` (scan → push via Neo4j driver)
 - exits upon completion (idempotent MERGEs in Cypher)
+
+
+## Event-driven publisher/subscriber queue (SQLite)
+
+New services:
+- `queue` (FastAPI, port `${QUEUE_API_PORT:-9000}`): publish events, enqueue jobs, SSE stream, GitHub webhook (`/hook/github`), backup endpoint (`/admin/backup`).
+- `worker` (Python): polls the SQLite queue and runs `scanner ingest` in-process (supports local repo paths or `git_url` checkout).
+
+**Persistence**: SQLite is stored under `./queue/data` (volume). **Backups**: `GET /admin/backup` writes a copy under `./queue/backups` (volume).
+
+**Run**
+```bash
+docker compose --env-file .env up -d --build queue worker
+# UI at http://localhost:${WEB_PORT:-3000}/queue/index.html
+```
+
+**Enqueue a job**
+```bash
+curl -X POST http://localhost:${QUEUE_API_PORT:-9000}/jobs/ingest \      -H 'Content-Type: application/json' \      -d '{"repo_path":"./sample-repo","conn_name":"demo_pg"}'
+```
+
+**Stream events (SSE)**
+```bash
+curl -N http://localhost:${QUEUE_API_PORT:-9000}/events/stream
+```
+
+**GitHub webhook**
+- Point your repo webhook to `POST http://<host>:${QUEUE_API_PORT:-9000}/hook/github` (content type: `application/json`).
+- Optional: set `GITHUB_WEBHOOK_SECRET` in `.env` to enable signature verification.
+- On push events, an ingest job is queued with `git_url` & branch from the payload.
