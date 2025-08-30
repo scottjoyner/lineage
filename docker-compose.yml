@@ -61,6 +61,12 @@ services:
 
   queue:
     build: ./queue/api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     container_name: lineage_queue
     restart: unless-stopped
     environment:
@@ -76,6 +82,8 @@ services:
 
   worker:
     build: ./queue/worker
+    ports:
+      - "${WORKER_METRICS_PORT:-9100}:9100"
     container_name: lineage_worker
     restart: unless-stopped
     depends_on: []

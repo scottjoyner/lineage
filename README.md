@@ -188,3 +188,20 @@ curl -N http://localhost:${QUEUE_API_PORT:-9000}/events/stream
 - Point your repo webhook to `POST http://<host>:${QUEUE_API_PORT:-9000}/hook/github` (content type: `application/json`).
 - Optional: set `GITHUB_WEBHOOK_SECRET` in `.env` to enable signature verification.
 - On push events, an ingest job is queued with `git_url` & branch from the payload.
+
+
+## Quality, scale, and ops (added)
+
+- **Concurrency**: `WORKER_CONCURRENCY` controls parallel jobs per worker. Scale workers horizontally to increase throughput.
+- **Retries**: Exponential backoff with jitter; max attempts configurable per job.
+- **Metrics**: API exposes `/metrics`; worker exports Prometheus at `:${WORKER_METRICS_PORT:-9100}`.
+- **Structured logs**: JSON logs everywhere; include job ids and timing.
+- **Health**: Queue has a healthcheck; worker has metrics endpoint. Add liveness probes in K8s.
+- **Tests**: See `queue/tests/` for API and backoff unit tests.
+
+### Run tests (locally)
+```bash
+python -m venv .venv && . .venv/bin/activate
+pip install -r queue/api/requirements.txt -r queue/worker/requirements.txt pytest requests
+pytest -q queue/tests
+```
