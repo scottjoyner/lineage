@@ -205,3 +205,14 @@ python -m venv .venv && . .venv/bin/activate
 pip install -r queue/api/requirements.txt -r queue/worker/requirements.txt pytest requests
 pytest -q queue/tests
 ```
+
+
+### Troubleshooting: registry EOF during build
+If you see `failed to authorize: Unavailable: error reading from server: EOF` while pulling base images:
+- Try `docker login` to ensure you're authenticated with Docker Hub.
+- Retry the pull so BuildKit can resume the download:
+  ```bash
+  docker pull python:3.11-slim
+  docker pull nginx:1.27-alpine
+  ```
+- If you're behind a firewall/VPN, configure a registry mirror or retry after network stabilization.

@@ -16,16 +16,5 @@ USER appuser
 
 VOLUME ["/data", "/backups"]
 
-HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 CMD python - <<'PY'
-import os,requests;import sys
-u=f"http://127.0.0.1:{os.getenv('API_PORT','9000')}/healthz";import urllib.request
-try:
-  urllib.request.urlopen(u, timeout=2)
-  print('ok')
-  sys.exit(0)
-except Exception as e:
-  print('fail',e)
-  sys.exit(1)
-PY
-
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 CMD-SHELL python -c "import os,urllib.request,sys;u='http://127.0.0.1:'+os.getenv('API_PORT','9000')+'/healthz';urllib.request.urlopen(u,timeout=2)" || exit 1
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9000"]
