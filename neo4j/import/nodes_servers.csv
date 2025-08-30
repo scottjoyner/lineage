@@ -1,0 +1,5 @@
+server_key,fqdn,ip,os,rack_id,dc_id,owner,tags
+web1.example.int,web1.example.int,10.0.0.10,ubuntu22,R1,DC1,platform,"['web']"
+app1.example.int,app1.example.int,10.0.0.20,ubuntu22,R1,DC1,platform,"['app']"
+etl1.example.int,etl1.example.int,10.0.0.30,ubuntu22,R2,DC1,data-eng,"['etl','kafka']"
+db1.example.int,db1.example.int,10.0.0.40,debian12,R3,DC1,dba,"['postgres']"

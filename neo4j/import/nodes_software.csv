@@ -1,0 +1,7 @@
+soft_key,name,version,kind,owner,tags
+app1|OrderService|2.3.0,OrderService,2.3.0,webapp,app-team,"['orders']"
+app1|ClickIngestor|1.0.0,ClickIngestor,1.0.0,service,app-team,"['kafka','ingest']"
+etl1|Airflow|2.9.0,Airflow,2.9.0,orchestrator,data-eng,"['scheduler']"
+etl1|DBTTransform|1.5.0,DBTTransform,1.5.0,etl,data-eng,"['dbt','transform']"
+db1|Postgres|14,Postgres,14,db,dba,"['rdbms']"
+etl1|Kafka|3.6.0,Kafka,3.6.0,broker,data-eng,"['kafka']"

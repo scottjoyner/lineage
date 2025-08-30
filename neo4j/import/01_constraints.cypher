@@ -1,0 +1,11 @@
+CREATE CONSTRAINT website_key IF NOT EXISTS FOR (n:Website) REQUIRE n.site_key IS UNIQUE;
+CREATE CONSTRAINT server_key  IF NOT EXISTS FOR (n:Server)  REQUIRE n.server_key IS UNIQUE;
+CREATE CONSTRAINT software_key IF NOT EXISTS FOR (n:Software) REQUIRE n.soft_key IS UNIQUE;
+CREATE CONSTRAINT dir_key IF NOT EXISTS FOR (n:Directory) REQUIRE n.dir_key IS UNIQUE;
+CREATE CONSTRAINT feed_key IF NOT EXISTS FOR (n:Feed) REQUIRE n.feed_key IS UNIQUE;
+CREATE CONSTRAINT pde_key IF NOT EXISTS FOR (n:PDE) REQUIRE n.pde_key IS UNIQUE;
+CREATE CONSTRAINT flow_job_id IF NOT EXISTS FOR (n:FlowRun) REQUIRE n.job_id IS UNIQUE;
+
+CREATE INDEX pde_name IF NOT EXISTS FOR (n:PDE) ON (n.name);
+CREATE INDEX feed_name IF NOT EXISTS FOR (n:Feed) ON (n.name);
+CREATE INDEX soft_name IF NOT EXISTS FOR (n:Software) ON (n.name, n.version);

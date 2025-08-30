@@ -1,0 +1,6 @@
+feed_key,name,feed_type,format,system,schema_hash,owner,tags
+db1.pg|orders_db.orders|table,orders_db.orders,table,postgres,postgres://db1,hash123,dba,"['orders']"
+etl1.fs|orders_raw|files,orders_raw,file,parquet,fs:///data/warehouse/raw,hash456,data-eng,"['raw']"
+etl1.fs|orders_stage|files,orders_stage,file,parquet,fs:///data/warehouse/stage,hash789,data-eng,"['stage']"
+db1.pg|dw.orders_fact|table,dw.orders_fact,table,postgres,postgres://db1/dw,hashabc,dba,"['fact']"
+kafka|clickstream_topic|topic,clickstream_topic,topic,kafka,kafka://etl1,hashkfk,data-eng,"['clicks']"

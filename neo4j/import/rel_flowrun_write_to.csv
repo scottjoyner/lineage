@@ -1,0 +1,4 @@
+job_id,feed_key
+scan-2025-08-25T09:00:00Z,etl1.fs|orders_raw|files
+scan-2025-08-25T09:00:00Z,etl1.fs|orders_stage|files
+scan-2025-08-25T09:00:00Z,db1.pg|dw.orders_fact|table

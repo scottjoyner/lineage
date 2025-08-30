@@ -1,0 +1,6 @@
+dir_key,path,fs,mount,owner,tags
+app1|/var/app/orders,/var/app/orders,ext4,/var,app-team,"['appdata']"
+etl1|/data/warehouse/raw,/data/warehouse/raw,ext4,/data,data-eng,"['raw']"
+etl1|/data/warehouse/stage,/data/warehouse/stage,ext4,/data,data-eng,"['stage']"
+db1|/var/lib/postgresql/14/data,/var/lib/postgresql/14/data,ext4,/var,dba,"['pgdata']"
+etl1|/var/lib/kafka,/var/lib/kafka,ext4,/var,data-eng,"['kafka']"

@@ -1,0 +1,8 @@
+pde_key,name,data_type,pii,domain,owner,tags
+orders_db.orders.id,orders_db.orders.id,int,false,orders,dba,"[]"
+orders_db.orders.customer_id,orders_db.orders.customer_id,string,true,orders,dba,"['pii']"
+orders_db.orders.total_amount,orders_db.orders.total_amount,decimal,false,orders,dba,"[]"
+orders_raw.customer_id,orders_raw.customer_id,string,true,orders,data-eng,"['pii','raw']"
+orders_stage.customer_id_hash,orders_stage.customer_id_hash,string,false,orders,data-eng,"['masked']"
+dw.orders_fact.customer_sk,dw.orders_fact.customer_sk,int,false,orders,data-eng,"['dim']"
+dw.orders_fact.amount_usd,dw.orders_fact.amount_usd,decimal,false,orders,data-eng,"[]"

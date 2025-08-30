@@ -1,0 +1,6 @@
+dir_key,feed_key
+etl1|/data/warehouse/raw,etl1.fs|orders_raw|files
+etl1|/data/warehouse/stage,etl1.fs|orders_stage|files
+db1|/var/lib/postgresql/14/data,db1.pg|orders_db.orders|table
+db1|/var/lib/postgresql/14/data,db1.pg|dw.orders_fact|table
+etl1|/var/lib/kafka,kafka|clickstream_topic|topic

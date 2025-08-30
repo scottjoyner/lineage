@@ -1,0 +1,5 @@
+src_pde_key,tgt_pde_key,job_id,ts,op,lineage_hash,quality,bytes,rows
+orders_db.orders.customer_id,orders_raw.customer_id,scan-2025-08-25T09:00:00Z,2025-08-25T09:15:00Z,copy,lh1,PASS,102400,12000
+orders_raw.customer_id,orders_stage.customer_id_hash,scan-2025-08-25T09:00:00Z,2025-08-25T09:35:00Z,mask,lh2,PASS,51200,11850
+orders_stage.customer_id_hash,dw.orders_fact.customer_sk,scan-2025-08-25T09:00:00Z,2025-08-25T09:50:00Z,surrogate_join,lh3,PASS,25600,11850
+orders_db.orders.total_amount,dw.orders_fact.amount_usd,scan-2025-08-25T09:00:00Z,2025-08-25T09:50:00Z,transform,lh4,PASS,12800,11850

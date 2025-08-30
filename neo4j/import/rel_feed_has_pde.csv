@@ -1,0 +1,8 @@
+feed_key,pde_key
+db1.pg|orders_db.orders|table,orders_db.orders.id
+db1.pg|orders_db.orders|table,orders_db.orders.customer_id
+db1.pg|orders_db.orders|table,orders_db.orders.total_amount
+etl1.fs|orders_raw|files,orders_raw.customer_id
+etl1.fs|orders_stage|files,orders_stage.customer_id_hash
+db1.pg|dw.orders_fact|table,dw.orders_fact.customer_sk
+db1.pg|dw.orders_fact|table,dw.orders_fact.amount_usd

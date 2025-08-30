@@ -1,0 +1,6 @@
+soft_key,dir_key
+app1|OrderService|2.3.0,app1|/var/app/orders
+etl1|Airflow|2.9.0,etl1|/data/warehouse/raw
+etl1|DBTTransform|1.5.0,etl1|/data/warehouse/stage
+db1|Postgres|14,db1|/var/lib/postgresql/14/data
+etl1|Kafka|3.6.0,etl1|/var/lib/kafka

@@ -1,0 +1,4 @@
+soft_key,feed_key,job_id,ts,bytes,rows
+etl1|Airflow|2.9.0,etl1.fs|orders_raw|files,scan-2025-08-25T09:00:00Z,2025-08-25T09:15:00Z,2048576,12000
+etl1|DBTTransform|1.5.0,etl1.fs|orders_stage|files,scan-2025-08-25T09:00:00Z,2025-08-25T09:35:00Z,1024000,11850
+etl1|DBTTransform|1.5.0,db1.pg|dw.orders_fact|table,scan-2025-08-25T09:00:00Z,2025-08-25T09:50:00Z,409600,11850

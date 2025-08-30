@@ -1,0 +1,3 @@
+site_key,url,env,owner,tags
+orders.example.com,https://orders.example.com,prod,app-team,"['payments','orders']"
+analytics.example.com,https://analytics.example.com,prod,bi-team,"['bi','dashboards']"

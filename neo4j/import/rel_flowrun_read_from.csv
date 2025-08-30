@@ -1,0 +1,5 @@
+job_id,feed_key
+scan-2025-08-25T09:00:00Z,db1.pg|orders_db.orders|table
+scan-2025-08-25T09:00:00Z,etl1.fs|orders_raw|files
+scan-2025-08-25T09:00:00Z,etl1.fs|orders_stage|files
+scan-2025-08-29T10:00:00Z,kafka|clickstream_topic|topic

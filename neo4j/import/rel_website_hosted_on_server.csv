@@ -1,0 +1,3 @@
+site_key,server_key
+orders.example.com,app1.example.int
+analytics.example.com,etl1.example.int
