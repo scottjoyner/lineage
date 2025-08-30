@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lineage Viewer</title>
+  <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+  <style>
+    :root { --bg: #0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; }
+    html, body { height: 100%; margin:0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+    .wrap { display: grid; grid-template-columns: 320px 1fr; grid-template-rows: auto 1fr; height: 100%; gap: 10px; padding: 10px; }
+    header { grid-column: 1 / 3; display:flex; align-items:center; justify-content:space-between; background: var(--card); border-radius: 12px; padding: 10px 14px; }
+    header h1 { font-size: 18px; margin:0; }
+    .panel { background: var(--card); border-radius: 12px; padding: 12px; overflow:auto; }
+    .panel h2 { margin: 8px 0 12px; font-size: 14px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+    .row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+    label { font-size: 12px; color: var(--muted); }
+    input, select, button { font-size: 14px; border:1px solid #1f2937; background:#0b1220; color:var(--text); border-radius:8px; padding:8px 10px; }
+    input[type="radio"] { accent-color: var(--accent); }
+    button { cursor:pointer; }
+    button.primary { background: #0ea5e9; border-color:#0284c7; color:white; }
+    #cy { background: #0b1220; border-radius: 12px; }
+    .kv { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#060a13; border-radius:8px; padding:8px; font-size:12px; white-space: pre-wrap; word-break: break-all; }
+    .tiny { font-size: 12px; color: var(--muted); }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Lineage Viewer</h1>
+    <div class="tiny">API: <code id="apiEcho"></code></div>
+  </header>
+
+  <div class="panel">
+    <h2>Query</h2>
+    <div class="row">
+      <label><input type="radio" name="mode" value="pde" checked> PDE</label>
+      <label><input type="radio" name="mode" value="site"> Website</label>
+    </div>
+    <div class="row">
+      <label style="min-width:80px">Key</label>
+      <input id="key" placeholder="e.g. dw.orders_fact.amount_usd" style="flex:1" />
+    </div>
+    <div class="row">
+      <label style="min-width:80px">Max hops</label>
+      <input id="hops" type="number" value="4" min="1" max="8" style="width:90px"/>
+    </div>
+    <div class="row">
+      <label style="min-width:80px">API URL</label>
+      <input id="api" placeholder="http://localhost:8000" style="flex:1"/>
+    </div>
+    <div class="row">
+      <button id="load" class="primary">Load graph</button>
+      <button id="fit">Fit</button>
+      <select id="layout">
+        <option value="cose">cose</option>
+        <option value="breadthfirst">breadthfirst</option>
+        <option value="concentric">concentric</option>
+        <option value="grid">grid</option>
+      </select>
+      <button id="relayout">Apply layout</button>
+    </div>
+
+    <h2>Selected</h2>
+    <div id="sel" class="kv">Nothing selected.</div>
+
+    <p class="hint">Tip: Click a node or edge to inspect properties. Style is based on <code>data.type</code> (nodes) and <code>data.label</code>/<code>data.op</code> (edges).</p>
+    <p class="hint">Seed keys: <code>dw.orders_fact.amount_usd</code>, <code>orders.example.com</code></p>
+  </div>
+
+  <div class="panel" style="grid-column:2;grid-row:2">
+    <div id="cy" style="width: 100%; height: 100%;"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const apiInput = document.getElementById('api');
+  const apiEcho = document.getElementById('apiEcho');
+  const keyInput = document.getElementById('key');
+  const hopsInput = document.getElementById('hops');
+  const modeRadios = [...document.querySelectorAll('input[name="mode"]')];
+  const layoutSel = document.getElementById('layout');
+  const btnLoad = document.getElementById('load');
+  const btnFit = document.getElementById('fit');
+  const btnRelayout = document.getElementById('relayout');
+  const selDiv = document.getElementById('sel');
+
+  // Infer default API: current host but port 8000, unless query ?api=... provided
+  const qs = new URLSearchParams(location.search);
+  const qsApi = qs.get('api');
+  const defaultApi = qsApi || (location.hostname ? `http://${location.hostname}:8000` : 'http://localhost:8000');
+  apiInput.value = defaultApi;
+  apiEcho.textContent = defaultApi;
+
+  keyInput.value = 'dw.orders_fact.amount_usd';
+
+  const cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: [],
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'background-color': ele => nodeColor(ele.data('type')),
+          'label': ele => labelText(ele),
+          'color': '#e5e7eb',
+          'font-size': '10px',
+          'text-wrap': 'wrap',
+          'text-max-width': '120px',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'width': 'label',
+          'height': 'label',
+          'padding': '12px',
+          'shape': ele => nodeShape(ele.data('type')),
+          'border-width': 1,
+          'border-color': '#0ea5e9'
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'line-color': ele => edgeColor(ele.data('label'), ele.data('op')),
+          'target-arrow-color': ele => edgeColor(ele.data('label'), ele.data('op')),
+          'target-arrow-shape': 'triangle',
+          'curve-style': 'bezier',
+          'width': 2,
+          'label': ele => edgeLabel(ele.data()),
+          'font-size': '9px',
+          'color': '#a3a3a3',
+          'text-background-color': '#060a13',
+          'text-background-opacity': 0.8,
+          'text-background-padding': 2
+        }
+      },
+      { selector: ':selected', style: { 'border-width': 3, 'border-color': '#f59e0b' } }
+    ],
+    layout: { name: 'cose' }
+  });
+
+  function nodeColor(t){
+    switch (t){
+      case 'Website': return '#2563eb';
+      case 'Server': return '#4f46e5';
+      case 'Software': return '#7c3aed';
+      case 'Directory': return '#0ea5e9';
+      case 'Feed': return '#10b981';
+      case 'PDE': return '#f59e0b';
+      case 'FlowRun': return '#ef4444';
+      default: return '#64748b';
+    }
+  }
+  function nodeShape(t){
+    switch (t){
+      case 'Website': return 'round-rectangle';
+      case 'Server': return 'rectangle';
+      case 'Software': return 'diamond';
+      case 'Directory': return 'round-rectangle';
+      case 'Feed': return 'ellipse';
+      case 'PDE': return 'hexagon';
+      case 'FlowRun': return 'octagon';
+      default: return 'ellipse';
+    }
+  }
+  function labelText(ele){
+    const d = ele.data();
+    return `${d.type}\n${d.name || d.url || d.fqdn || d.path || d.site_key || d.server_key || d.soft_key || d.dir_key || d.feed_key || d.pde_key}`;
+  }
+  function edgeColor(lbl, op){
+    if (lbl === 'FLOWS_TO'){
+      if (op === 'mask') return '#f59e0b';
+      if (op === 'transform') return '#22d3ee';
+      if (op === 'surrogate_join') return '#eab308';
+      return '#fb7185';
+    }
+    if (lbl === 'READS') return '#60a5fa';
+    if (lbl === 'WRITES') return '#34d399';
+    if (lbl === 'HOSTED_ON' || lbl === 'RUNS' || lbl === 'USES' || lbl === 'EXPOSES' || lbl === 'HAS') return '#94a3b8';
+    return '#a3a3a3';
+  }
+  function edgeLabel(d){
+    const base = d.label || '';
+    if (d.op) return `${base}:${d.op}`;
+    return base;
+  }
+
+  cy.on('select', 'node, edge', e => {
+    const d = e.target.data();
+    selDiv.textContent = JSON.stringify(d, null, 2);
+  });
+  cy.on('unselect', 'node, edge', () => {
+    selDiv.textContent = 'Nothing selected.';
+  });
+
+  btnLoad.addEventListener('click', async () => {
+    const mode = modeRadios.find(r => r.checked)?.value || 'pde';
+    const key = keyInput.value.trim();
+    const hops = parseInt(hopsInput.value, 10) || 4;
+    const api = apiInput.value.trim() || defaultApi;
+    apiEcho.textContent = api;
+
+    if (!key){ alert('Enter a key'); return; }
+
+    const url = new URL(`${api}/lineage`);
+    if (mode === 'pde') url.searchParams.set('pde_key', key);
+    else url.searchParams.set('site_key', key);
+    url.searchParams.set('max_hops', String(hops));
+
+    try {
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+
+      // Cytoscape expects "data" inside each element already (API returns that); pass through
+      cy.elements().remove();
+      cy.add(data.nodes);
+      cy.add(data.edges);
+      applyLayout(layoutSel.value);
+      cy.fit();
+    } catch (err){
+      console.error(err);
+      alert('Failed to load graph. Check API URL and that data is loaded.');
+    }
+  });
+
+  btnFit.addEventListener('click', () => cy.fit());
+  btnRelayout.addEventListener('click', () => applyLayout(layoutSel.value));
+
+  function applyLayout(name){
+    const optsByName = {
+      'cose': { name: 'cose', animate: 'end', fit: true },
+      'breadthfirst': { name: 'breadthfirst', directed: true, spacingFactor: 1.2, fit: true },
+      'concentric': { name: 'concentric', minNodeSpacing: 30, concentric: n => n.data('type') === 'PDE' ? 3 : 1, levelWidth: () => 2, fit:true },
+      'grid': { name: 'grid', fit: true }
+    };
+    cy.layout(optsByName[name] || { name: 'cose' }).run();
+  }
+
+  // Auto-load initial example
+  btnLoad.click();
+})();
+</script>
+</body>
+</html>

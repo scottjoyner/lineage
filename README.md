@@ -68,3 +68,15 @@ cy.add(result.edges);
 
 ## Cytoscape Styling Ideas
 Use `data.type` to color nodes by layer and `data.op` on edges to style different lineage ops (copy/mask/transform).
+
+
+## Web UI (Cytoscape.js)
+A minimal static UI (Nginx) is included.
+
+- URL: `http://localhost:${WEB_PORT:-3000}`
+- It fetches from the API (defaults to `http://localhost:${API_PORT:-8000}`). You can override via query param `?api=...` or the input field in the left panel.
+
+Controls:
+- Choose PDE or Website, enter the key, set max hops, then **Load graph**
+- Change layout (cose / breadthfirst / concentric / grid)
+- Click nodes/edges to see properties
