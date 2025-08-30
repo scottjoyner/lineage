@@ -80,3 +80,13 @@ Controls:
 - Choose PDE or Website, enter the key, set max hops, then **Load graph**
 - Change layout (cose / breadthfirst / concentric / grid)
 - Click nodes/edges to see properties
+
+
+## Five demo views (web/)
+- `/index.html` – Explorer (cose / breadthfirst / concentric / grid, inspect, export)
+- `/view-dagre.html` – Hierarchical DAG with **cytoscape-dagre**
+- `/view-cose-bilkent.html` – Large graph layout with **cytoscape-cose-bilkent**
+- `/view-sbgn.html` – SBGN stylesheet demo (via **cytoscape-sbgn-stylesheet**)
+- `/view-grid.html` – Table-like, multi-column level view (preset positions by layer)
+
+Tip: Pass `?api=http://host:8000` to any page to point at a remote API.

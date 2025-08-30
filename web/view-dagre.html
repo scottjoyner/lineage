@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lineage – DAG (dagre)</title>
+  <link rel="stylesheet" href="/assets/styles.css"/>
+  <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+  <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+  <script src="/assets/common.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Lineage – DAG (dagre)</h1>
+    <nav class="nav">
+      <a href="/index.html">Explorer</a>
+      <a href="/view-dagre.html">DAG (dagre)</a>
+      <a href="/view-cose-bilkent.html">Large (cose-bilkent)</a>
+      <a href="/view-sbgn.html">SBGN</a>
+      <a href="/view-grid.html">Level Grid</a>
+    </nav>
+  </header>
+
+  <div class="panel">
+    <h2>Controls</h2>
+    <div class="row">
+      <label><input type="radio" name="mode" value="pde" checked> PDE</label>
+      <label><input type="radio" name="mode" value="site"> Website</label>
+    </div>
+    <div class="row"><label style="min-width:80px">Key</label><input id="key" style="flex:1" placeholder="dw.orders_fact.amount_usd"/></div>
+    <div class="row"><label style="min-width:80px">Hops</label><input id="hops" type="number" value="6" min="1" max="10" style="width:90px"/></div>
+    <div class="row"><label style="min-width:80px">API</label><input id="api" style="flex:1"/></div>
+    <div class="row">
+      <button id="load" class="primary">Load</button>
+      <button id="fit">Fit</button>
+      <button id="png">Export PNG</button>
+      <button id="json">Export JSON</button>
+    </div>
+    <h2>Legend</h2>
+    <div id="legend" class="legend"></div>
+    <hr>
+    <div class="hint">DAG layout groups by direction (structural + flow). Use higher hops for larger context.</div>
+  </div>
+  <div class="panel" style="grid-column:2;grid-row:2"><div id="cy" style="width:100%;height:100%"></div></div>
+</div>
+<script>
+(function(){
+  const apiIn = document.getElementById('api'); apiIn.value = defaultApi();
+  const keyIn = document.getElementById('key'); keyIn.value = 'dw.orders_fact.amount_usd';
+  const hopsIn = document.getElementById('hops');
+  const modeRadios = [...document.querySelectorAll('input[name="mode"]')];
+  buildLegend(document.getElementById('legend'));
+
+  const cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: [],
+    style: baseStyle(),
+    layout: { name: 'dagre', animate: true, rankDir: 'LR', nodeSep: 30, rankSep: 60, edgeSep: 10, fit: true }
+  });
+
+  document.getElementById('load').addEventListener('click', async () => {
+    const mode = modeRadios.find(r=>r.checked)?.value || 'pde';
+    await loadGraph(cy, apiIn.value, mode, keyIn.value, parseInt(hopsIn.value,10)||4);
+    cy.layout({ name:'dagre', rankDir:'LR', nodeSep:30, rankSep:60, edgeSep:10, animate:'end', fit:true }).run();
+  });
+  document.getElementById('fit').addEventListener('click', ()=> cy.fit());
+  document.getElementById('png').addEventListener('click', ()=> exportPng(cy));
+  document.getElementById('json').addEventListener('click', ()=> exportJson(cy));
+
+  // Auto-load
+  document.getElementById('load').click();
+})();
+</script>
+</body>
+</html>

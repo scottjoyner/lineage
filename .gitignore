@@ -1,0 +1,114 @@
+# ===== General OS / Editor =====
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+.idea/
+.vscode/
+.history/
+
+# ===== Git =====
+*.patch
+*.rej
+
+# ===== Env & Secrets =====
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.envrc
+*.pem
+*.key
+*.crt
+*.p12
+*.der
+id_rsa*
+id_dsa*
+*.keystore
+
+# ===== Docker / Compose =====
+# Local overrides & runtime artifacts
+docker-compose.*.local.yml
+*.pid
+logs/
+tmp/
+temp/
+.cache/
+cache/
+
+# ===== Neo4j (if you mount volumes inside the repo) =====
+neo4j/data/
+neo4j/logs/
+neo4j/import/
+neo4j/plugins/
+neo4j/metrics/
+
+# ===== Postgres =====
+postgres/data/
+*.dump
+*.sql.gz
+
+# ===== Redis =====
+dump.rdb
+appendonly.aof
+*.rdb
+*.aof
+
+# ===== MinIO =====
+minio/data/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+.venv/
+venv/
+ENV/
+env/
+build/
+dist/
+.eggs/
+*.egg-info/
+.mypy_cache/
+.pytype/
+.pytest_cache/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+.ipynb_checkpoints/
+
+# ===== Node / JS =====
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.next/
+.out/
+dist/
+*.tsbuildinfo
+.eslintcache
+
+# ===== Databases / Artifacts =====
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# ===== Images / Models (optional large assets) =====
+/models/
+/artifacts/
+/downloads/
