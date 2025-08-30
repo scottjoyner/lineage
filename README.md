@@ -90,3 +90,35 @@ Controls:
 - `/view-grid.html` – Table-like, multi-column level view (preset positions by layer)
 
 Tip: Pass `?api=http://host:8000` to any page to point at a remote API.
+
+
+## Local Neo4j passthrough (dev)
+If you want the API to use a **local Neo4j** running on your host instead of the container:
+
+**Option A — Compose override (recommended)**
+1) Create or use the included `docker-compose.local.yml`.
+2) Ensure your local Neo4j is listening on Bolt (default `localhost:7687`).
+3) Start API + Web only (Neo4j container is put under the `db` profile and won’t start by default):
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env up -d --build
+```
+4) If needed, set `NEO4J_URI` in `.env` (or export it) to `bolt://host.docker.internal:7687`.
+   - On Linux, this override maps `host.docker.internal` to the host gateway.
+
+**Option B — Env-only**
+1) Keep using the default `docker-compose.yml` but set:
+   - `NEO4J_URI=bolt://host.docker.internal:7687`
+   - `NEO4J_USER=neo4j`
+   - `NEO4J_PASS=<your local password>` (if different from `NEO4J_PASSWORD`)
+2) Bring up the stack (Neo4j container will still start; you can avoid it by using Option A).
+
+**Start the containerized Neo4j only when you want it**
+```bash
+# add the db profile to include the containerized Neo4j
+docker compose -f docker-compose.yml -f docker-compose.local.yml --env-file .env --profile db up -d --build
+```
+
+**Notes**
+- The API resolves `host.docker.internal` on Linux via `extra_hosts: host-gateway` in the override.
+- You can also run the API outside Docker entirely; just set `NEO4J_URI=bolt://localhost:7687` and
+  `NEO4J_USER` / `NEO4J_PASS` in your shell.
