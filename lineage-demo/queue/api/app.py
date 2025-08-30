@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
-from queue.logging_util import setup_json_logging
+from logging_util import setup_json_logging
 
 DB_PATH = os.getenv("DB_PATH", "/data/queue.db")
 BACKUP_DIR = os.getenv("BACKUP_DIR", "/backups")

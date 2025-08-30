@@ -1,0 +1,2 @@
+CREATE CONSTRAINT node_id IF NOT EXISTS FOR (n:Node) REQUIRE n.id IS UNIQUE;
+CREATE INDEX node_name IF NOT EXISTS FOR (n:Node) ON (n.name);

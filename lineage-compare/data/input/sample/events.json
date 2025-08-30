@@ -1,0 +1,20 @@
+[
+  {
+    "source": "repoA/a.py",
+    "target": "s3://bucket/raw/events.json",
+    "op": "write",
+    "repo": "repoA"
+  },
+  {
+    "source": "s3://bucket/raw/events.json",
+    "target": "s3://bucket/stage/events_clean.parquet",
+    "op": "transform",
+    "repo": "repoA"
+  },
+  {
+    "source": "warehouse.sales_orders",
+    "target": "dashboards/sales_rev",
+    "op": "serve",
+    "repo": "analytics"
+  }
+]

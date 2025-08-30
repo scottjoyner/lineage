@@ -1,7 +1,8 @@
 import os, time, datetime, shutil, aiosqlite, asyncio, socket, logging, random
 from pathlib import Path
 from prometheus_client import Counter, Histogram, Gauge, start_http_server
-from queue.logging_util import setup_json_logging
+from logging_util import setup_json_logging
+
 
 # Import scanner modules (installed in image)
 from lineage_scanner.scan import scan_path

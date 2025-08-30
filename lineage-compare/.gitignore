@@ -1,0 +1,10 @@
+__pycache__/
+.venv/
+.env
+.env.*
+!.env.example
+data/normalized/
+data/output/
+data/neo4j/
+node_modules/
+.DS_Store

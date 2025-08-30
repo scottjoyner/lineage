@@ -1,0 +1,6 @@
+USE GLOBAL
+DROP GRAPH LineageGraph IF EXISTS
+CREATE GRAPH LineageGraph(Node, FLOWS_TO)
+USE GRAPH LineageGraph
+CREATE VERTEX Node (PRIMARY_ID id STRING, name STRING, type STRING, repo STRING) WITH primary_id_as_attribute="true";
+CREATE DIRECTED EDGE FLOWS_TO (FROM Node, TO Node, op STRING, ts DATETIME, weight FLOAT);
